@@ -1,4 +1,4 @@
-.PHONY: thesis.pdf all clean
+.PHONY: all 
 
 all: thesis.pdf
 
