@@ -1,0 +1,192 @@
+
+\documentclass[12pt,letterpaper]{article} 
+\usepackage[letterpaper,left=3.5cm,right=3.5cm, top=3.0cm, bottom=3.0cm, footnotesep=1.0cm]{geometry} 
+\usepackage{mathptmx}
+
+\usepackage[onehalfspacing]{setspace} 
+\usepackage{fancyhdr} 
+\usepackage{relsize}
+
+\usepackage[bottom]{footmisc}
+\usepackage{tabularx}
+\usepackage{mathtools}
+\pagestyle{empty}        
+
+
+\usepackage{booktabs}    
+\usepackage{natbib}      
+\usepackage{bibentry}   
+
+\usepackage{acronym}
+\usepackage{multicol}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage[usenames,dvipsnames]{color}
+
+\lstset{language=R,
+  basicstyle=\small\ttfamily,
+  stringstyle=\color{ForestGreen},
+  otherkeywords={0,1,2,3,4,5,6,7,8,9},
+  morekeywords={TRUE,FALSE},
+  deletekeywords={data,frame,length,as,character},
+  keywordstyle=\color{blue},
+  commentstyle=\color{ForestGreen},
+}
+
+
+\begin{document}
+
+\begin{center}\uppercase{Ludwig-Maximilians-University Munich}\end{center}
+\begin{center}\uppercase{Department of Statistics}\end{center}
+
+\vspace{3cm}
+
+\title{Variable selection using Grouped Horseshoe priors}
+\date{\vspace{-5ex}}
+{\let\newpage\relax\maketitle}
+\thispagestyle{empty}
+
+
+\begin{center}
+  \begin{large}
+    \begin{Large}
+      Bachelor's Thesis\\
+    \end{Large}
+    Department of Statistics  \\
+  \end{large}
+\end{center}
+\begin{center}
+  Author:\\
+  \begin{large}
+    Tobias Pielok\\
+  \end{large}
+\end{center}
+\vspace{1cm}
+\begin{center}
+  \begin{large}
+    Supervisor: Dr. Fabian Scheipl
+  \end{large}
+\end{center}
+
+\begin{center}  \begin{large}
+    Submission date: \\%\date{\today} \\
+  \end{large}
+\end{center}
+
+\vspace{1,5cm}
+
+\begin{center}
+  \begin{large}
+    \author{Tobias Pielok, B.Sc. (TUM)}\\
+ \end{large}
+  Marchgrabenplatz 5\\ 
+  80805 Munich\\ 
+  \url{t.pielok@campus.lmu.de}\\
+  Matrikelnr.:  11381351\\
+\end{center}
+
+
+\newpage
+\setcounter{page}{1}
+\tableofcontents
+\newpage
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt} 
+
+\section{Introduction}
+\pagebreak
+
+\section{Basic Concepts}
+\subsection{Bayesian inference}
+\subsection{Bayesian regression}
+\subsection{Variable selection}
+\subsubsection{(Grouped) Lasso}
+\subsubsection{Bayesian variable selection}
+\subsection{MCMC methods}
+\pagebreak
+
+\section{Bayesian Horseshoe}
+\subsection{Mathematical foundations}
+\subsection{Hyperprior choice for global shrinkage parameter}
+\subsection{Practical aspects}
+\pagebreak
+
+\section{Bayesian Grouped Horseshoe}
+\subsection{Grouped variables}
+\subsection{Extending Horseshoe prior to the case of grouped variables}
+\pagebreak
+
+\section{Simulations}
+\subsection{Settings}
+
+\subsection{Szenario 1}
+\subsubsection{Data generation}
+\subsubsection{Results}
+\subsection{Szenario 2}
+\subsubsection{Data generation}
+\subsubsection{Results}
+
+\subsection{Summary}
+\pagebreak
+
+\section{Benchmarking}
+
+\subsection{Regression}
+\subsubsection{Data description}
+\subsubsection{Comparisions and Results}
+\subsection{Classification}
+\subsubsection{Data description}
+\subsubsection{Comparisions and Results}
+
+\subsection{Summary}
+
+\pagebreak
+
+\section{Conclusions}
+\pagebreak
+
+
+
+\pagestyle{fancy}
+\bibliographystyle{apalike}
+\bibliography{thesis} 
+
+\nocite{*} 
+\addcontentsline{toc}{section}{Bibliography}
+\clearpage
+
+\listoffigures
+\addcontentsline{toc}{section}{List of Figures}
+\clearpage
+
+
+\section*{List of Abbreviations}
+\addcontentsline{toc}{section}{List of Abbreviations}
+\begin{multicols}{2}
+  \begin{acronym}[abr]
+    \acro{MCMC}{Markov Chain Monte Carlo}
+  \end{acronym}
+\end{multicols}
+
+
+
+\pagebreak
+\subsection*{Statement}
+\label{erklaerung}
+\vspace*{0.5cm}
+I hereby declare that this thesis is my own original work and that all sources have been acknowledged.\\[1.0cm]
+Munich, \today \\[2.0cm]
+\rule{6.0cm}{0.4pt} \\
+Tobias Pielok
+
+
+\end{document}
