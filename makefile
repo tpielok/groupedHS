@@ -4,15 +4,18 @@ OUT_DIR = plots
 
 .PHONY: all
 
-all: directories thesis.pdf all # clean
+all: directories thesis.pdf all
 
 directories: ${OUT_DIR}
 
 ${OUT_DIR}:
 	${MKDIR_P} ${OUT_DIR}
 
-thesis.pdf: 
+thesis.pdf:
+	cd src && $(MAKE)
 	cd thesis && $(MAKE) 
 
-#clean:
-#
+clean:
+	cd src && $(MAKE) clean
+	cd thesis && $(MAKE) clean
+
