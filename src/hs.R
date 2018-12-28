@@ -38,9 +38,11 @@ stan_params <- list(
 )
 
 
-fit <- stan(file = 'hs.stan', data = stan_params, 
-            iter = 1000, chains = 4, control = list(adapt_delta = 0.99))
-
+fit <- stan(file = './hs.stan', data = stan_params, 
+            iter = 1000, chains = 4, control = list(adapt_delta = 0.999999999
+            ))
+head(fit)                                                                                               max_treedepth = 10))
+pairs(fit)
 la <- extract(fit, permuted = TRUE)
 pos_betas <- as_tibble(la$beta)
 
