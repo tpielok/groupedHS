@@ -132,21 +132,21 @@ Eq. (\ref{eq:likprio}) can be rewritten with the predictive distribution (\ref{e
 \label{eq:post}
 \Pi_{\mu,\mathcal{P}}(T,X) = \int_X \mu_\mathcal{P}(T|\; x) P_{\mu,\mathcal{P}}(dx ). 
 \end{equation} 
-Under the assumption that the Bayesian experiment $(\mathcal{T}\times\mathcal{X},  \mathcal{B}_\mathcal{T}\bigotimes\mathcal{B}_\mathcal{X}, \Pi_{\mu,\mathcal{P}})$ is dominated in the Bayesian setting (if not other stated, this will be assumed for the rest of the thesis) it can be shown [\cite{interbayes}], that a posterior distribution for given $x$ can also be expressed with the Radon-Nikodym derivative, s.t. $\forall T \in \mathcal{B}_\mathcal{T}:$
+Under the assumption that the Bayesian experiment $(\mathcal{T}\times\mathcal{X},  \mathcal{B}_\mathcal{T}\bigotimes\mathcal{B}_\mathcal{X}, \Pi_{\mu,\mathcal{P}})$ is dominated in the Bayesian setting (if not other stated, this will be assumed for the rest of the thesis) it can be shown (see [\cite{interbayes}]), that a posterior distribution for given $x$ can also be expressed with the Radon-Nikodym derivative, s.t. $\forall T \in \mathcal{B}_\mathcal{T}:$
 \begin{equation}
 \label{eq:dpost}
  \mu_\mathcal{P}(T|\; x) = \frac{\int_T \frac{dP_\theta}{d\lambda}(x)\mu(d\theta)}{\int_\mathcal{T} \frac{dP_\theta}{d\lambda}(x)\mu(d\theta)},
 \end{equation} 
 where $(\mathcal{X}, \mathcal{B}_\mathcal{X}, \mathcal{P})$ is dominated by a finite measure $\lambda$. The function $\frac{dP_\theta}{d\lambda}$ is called \textit{likelihood function}. 
 %Why? -> inference%
-\\An adequate choice of a point estimate to determine the location of the parameter $\theta$ depends on the underlying loss function (ref.). If a quadratic loss function $L$ is chosen, i.e. $L(\theta, \hat{\theta}) = ||\theta - \hat{\theta}||_2^2$, the expected loss $\mathbb{E}_{\theta \sim \mu} (L(\theta, \hat{\theta}))$ is minimized by the \textit{posterior mean} $
-	\hat{\theta} = E_{\theta |x \sim \mu_\mathcal{P}}(\theta |\; x)$, if it exists [\cite{statdec}]. 
+\\An adequate choice of a point estimate to determine the location of the parameter $\theta$ depends on the underlying loss function. If a quadratic loss function $L$ is chosen, i.e. $L(\theta, \hat{\theta}) = ||\theta - \hat{\theta}||_2^2$, the expected loss $\mathbb{E}_{\theta \sim \mu} (L(\theta, \hat{\theta}))$ is minimized by the \textit{posterior mean} $
+	\hat{\theta} = E_{\theta |x \sim \mu_\mathcal{P}}(\theta |\; x)$, if it exists (see [\cite{statdec}]). 
 \\ A $100(1-\alpha)\%$ \textit{credible set} is a set $C \subset \mathcal{T}$, s.t.
 \begin{equation}
 1 - \alpha \leq P(C| \;x ) = \mu_\mathcal{P}(C|\; x).
 \end{equation}
 Which means that the parameter $\theta$ has the subjective probability of $(1-\alpha)$ that $\theta \in C$.
-Because $C$ is not unique, additional constraints can be imposed on the solution. If the size of $C$, which can be defined as  $S(C) := \mu(C)$, is minimized one gets under mild conditions the  $100(1-\alpha)\%$  HDP credible set, if there exists a posterior density $p_{\theta|\;x}$ [\cite{statdec}].
+Because $C$ is not unique, additional constraints can be imposed on the solution. If the size of $C$, which can be defined as  $S(C) := \mu(C)$, is minimized one gets under mild conditions the  $100(1-\alpha)\%$  HDP credible set  as described in [\cite{statdec}], if there exists a posterior density $p_{\theta|\;x}$.
 The  $100(1-\alpha)\%$ HDP credible set is defined as  
 \begin{equation}
 C = \{\theta \in \mathcal{T}: \; p_{\theta|\;x}(\theta|\; x) \geq k(\alpha)\},
