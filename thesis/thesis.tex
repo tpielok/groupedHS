@@ -27,6 +27,7 @@
 \usepackage{graphicx}
 \usepackage{mathtools}
 \usepackage[usenames,dvipsnames]{color}
+\usepackage{hyperref}
 
 \lstset{language=R,
   basicstyle=\small\ttfamily,
@@ -140,8 +141,12 @@ Under the assumption that the Bayesian experiment $(\mathcal{T}\times\mathcal{X}
 \end{equation} 
 where $(\mathcal{X}, \mathcal{B}_\mathcal{X}, \mathcal{P})$ is dominated by a finite measure $\lambda$. The function $\frac{dP_\theta}{d\lambda}$ is called \textit{likelihood function}. 
 %Why? -> inference%
-\\An adequate choice of a point estimate to determine the location of the parameter $\theta$ depends on the underlying loss function. If a quadratic loss function $L$ is chosen, i.e. $L(\theta, \hat{\theta}) = ||\theta - \hat{\theta}||_2^2$, the expected loss $\mathbb{E}_{\theta \sim \mu} (L(\theta, \hat{\theta}))$ is minimized by the \textit{posterior mean} $
-	\hat{\theta} = E_{\theta |x \sim \mu_\mathcal{P}}(\theta |\; x)$, if it exists (see [\cite{statdec}]). 
+\\An adequate choice of a point estimate to determine the location of the parameter $\theta$ depends on the underlying loss function. If a quadratic loss function $L$ is chosen, i.e. $L(\theta, \hat{\theta}) = ||\theta - \hat{\theta}||_2^2$, the expected loss $\mathbb{E}_{\theta \sim \mu} (L(\theta, \hat{\theta}))$ is minimized by the \textit{posterior mean} 
+\begin{equation}
+\label{eq:pmean}
+	\hat{\theta} = E_{\theta |x \sim \mu_\mathcal{P}}(\theta |\; x),
+\end{equation}
+ if it exists (see [\cite{statdec}]). 
 \\ A $100(1-\alpha)\%$ \textit{credible set} is a set $C \subset \mathcal{T}$, s.t.
 \begin{equation}
 1 - \alpha \leq P(C| \;x ) = \mu_\mathcal{P}(C|\; x).
@@ -150,6 +155,7 @@ Which means that the parameter $\theta$ has the subjective probability of $(1-\a
 Because $C$ is not unique, additional constraints can be imposed on the solution. If the size of $C$, which can be defined as  $S(C) := \mu(C)$, is minimized one gets under mild conditions the  $100(1-\alpha)\%$  HDP credible set  as described in [\cite{statdec}], if there exists a posterior density $p_{\theta|\;x}$.
 The  $100(1-\alpha)\%$ HDP credible set is defined as  
 \begin{equation}
+\label{eq:hdp}
 C = \{\theta \in \mathcal{T}: \; p_{\theta|\;x}(\theta|\; x) \geq k(\alpha)\},
 \end{equation}
 where $k(\alpha)$ is the largest constant, s.t. $C$ is a $100(1-\alpha)\%$ credible set.
@@ -169,19 +175,27 @@ $H$ is called a Hamiltonian if it holds that $\forall i \in \{1,\dots,d\}:$
 \begin{equation}
 \label{eq:hamdym}
 \begin{aligned}
-\frac{d \rho_i }{dt} = \frac{\partial H}{\partial \theta}, \\
-\frac{d \theta_i }{dt} = -\frac{\partial H}{\partial \rho}.
+\frac{d \rho_i }{dt} = \frac{\partial H}{\partial \theta_i}, \\
+\frac{d \theta_i }{dt} = -\frac{\partial H}{\partial \rho_i}.
 \end{aligned}
 \end{equation}
 It can be shown that the Hamiltonian dynamics (\ref{eq:hamdym}) is reversible and preservers volume, which can even hold for the discretized version of the differential equations (see [\cite{mcmchb}]). With the \textit{leapfrog integrator}, which uses a discrete time step $\epsilon$, this can be achieved and (\ref{eq:hamdym}) can be solved numerically stable (see [\cite{mcmchb}]). Transitioning from a state $(\rho, \theta)$ to a new state $(\rho^*,\theta^*)$ in the leapfrog scheme, firstly a new  $\rho$ is drawn independently of $\theta$ and previous values of $\rho$ and secondly $L$ leapfrog steps are applied. One step of the leapfrog integrator can be summarized as follows:
 \begin{enumerate}
 \item The auxiliary variable $\rho$ is updated with half-step $\frac{\epsilon}{2}$ update using the negative derivative of the potential energy.
-\item The parameter $\theta$ is updated with a full-step $\epsilon$ with the new $\rho$ and by using the derivative of the kinetic energy, which is represented by the covariance matrix $\Sigma$.
-\item Another half-step $\frac{\epsilon}{2}$ update of $\rho$ as in $(1.)$ is performed.
+\label{en:f}
+\item The parameter $\theta$ is updated with a full-step $\epsilon$ in the direction of the new $\rho$ multiplied with the derivative of the kinetic energy, which is represented by the covariance matrix $\Sigma$.
+\item Another half-step $\frac{\epsilon}{2}$ update of $\rho$ as in \ref{en:f} is performed.
 \end{enumerate}  
 After $L$ leapfrog steps the proposal state $(\rho^*,\theta^*)$ is accepted as the new state with a probability of 
 \[\min(1, \exp(H(\rho, \theta)-H(\rho^*,\theta^*))).
-\] Otherwise $(\rho, \theta)$ is returned as the new state and hence also serves as the new initialization for the next iteration. This is called the Metropolis Accept Step.
+\] Otherwise $(\rho, \theta)$ is returned as the new state and hence also serves as the new initialization for the next iteration. This is called the Metropolis Accept Step.\\
+ The series of by this scheme returned $\theta$ is also called a chain. As described in [\cite{convhmc}] under certain regularity conditions and control of the tail of posterior distribution $\mu_\mathcal{P}$ this chain is irreducible and (Harris) recurrent and $\mu_\mathcal{P}$ is its so-called invariant distribution. For a chain with these properties and under some additional assumptions it can be shown that with the use of ergodic theorems, that the chain  converges for almost every starting parameter $\theta_0$ in distribution to $\mu_\mathcal{P}$ and the law of large numbers and the central limit theorem are still valid, s.t. 
+inferences (\ref{eq:pmean}) and (\ref{eq:hdp}) can be carried out approximately on a converged chain (see [\cite{mcstability}]). \\
+The convergence speed of HMC is highly influenced by the hyper-parameters, i.e. the number of steps $L$, the step-size $\epsilon$ and the covariance matrix $\Sigma$.
+One scheme to tune the parameter $L$ is NUTS. The advantage of using NUTS consists in its auto-tuning capability without the need to execute pre-runs. The general idea of NUTS can be described as follows: For the state $(\rho,\theta)$ the hamilitonian dynamics are simulated randomly both forwards and backwards in time to guarantee time reversibility. In every step the steps taken in one direction are doubled. The algorithm is stopped for a current $(\tilde{\theta},\tilde{\rho})$ when 
+\begin{equation*}
+\frac{d}{dt}\frac{||\tilde{\theta} - \theta||^2_2}{2} = (\tilde{\theta} -\theta )\frac{d}{dt}(\theta - \tilde{\theta}) = (\tilde{\theta} -\theta )\Sigma\tilde{\rho} < 0,
+\end{equation*} i.e. the expected squared jump distance would shrink and the dynamics could be described as a \textit{U-turn}. From these simulated states new proposals are sampled (for further details see [\cite{nuts}]). 
 \label{sec:HMC}
 \subsection{Bayesian approach to Additive Models}
 \label{sec:AddMod}
