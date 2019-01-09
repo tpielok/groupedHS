@@ -192,12 +192,36 @@ After $L$ leapfrog steps the proposal state $(\rho^*,\theta^*)$ is accepted as t
  The series of by this scheme returned $\theta$ is also called a chain. As described in [\cite{convhmc}] under certain regularity conditions and control of the tail of posterior distribution $\mu_\mathcal{P}$ this chain is irreducible and (Harris) recurrent and $\mu_\mathcal{P}$ is its so-called invariant distribution. For a chain with these properties and under some additional assumptions it can be shown that with the use of ergodic theorems, that the chain  converges for almost every starting parameter $\theta_0$ in distribution to $\mu_\mathcal{P}$ and the law of large numbers and the central limit theorem are still valid, s.t. 
 inferences (\ref{eq:pmean}) and (\ref{eq:hdp}) can be carried out approximately on a converged chain (see [\cite{mcstability}]). \\
 The convergence speed of HMC is highly influenced by the hyper-parameters, i.e. the number of steps $L$, the step-size $\epsilon$ and the covariance matrix $\Sigma$.
-One scheme to tune the parameter $L$ is NUTS. The advantage of using NUTS consists in its auto-tuning capability without the need to execute pre-runs. The general idea of NUTS can be described as follows: For the state $(\rho,\theta)$ the hamilitonian dynamics are simulated randomly both forwards and backwards in time to guarantee time reversibility. In every step the steps taken in one direction are doubled. The algorithm is stopped for a current $(\tilde{\theta},\tilde{\rho})$ when 
+One scheme to tune the parameter $L$ is NUTS. The advantage of using NUTS consists in its auto-tuning capability without the need to execute pre-runs. The general idea of NUTS can be described as follows: For the state $(\rho,\theta)$ the Hamiltonian dynamics are simulated randomly both forwards and backwards in time to guarantee time reversibility. In every step the steps taken in one direction are doubled. The algorithm is stopped for a current $(\tilde{\theta},\tilde{\rho})$ when 
 \begin{equation*}
-\frac{d}{dt}\frac{||\tilde{\theta} - \theta||^2_2}{2} = (\tilde{\theta} -\theta )\frac{d}{dt}(\theta - \tilde{\theta}) = (\tilde{\theta} -\theta )\Sigma\tilde{\rho} < 0,
-\end{equation*} i.e. the expected squared jump distance would shrink and the dynamics could be described as a \textit{U-turn}. From these simulated states new proposals are sampled (for further details see [\cite{nuts}]). 
+\frac{d}{dt}\frac{||\tilde{\theta} - \theta||^2_2}{2} = (\tilde{\theta} -\theta )^T\frac{d}{dt}(\tilde{\theta} - \theta) = (\tilde{\theta} -\theta )^T\Sigma\tilde{\rho} < 0,
+\end{equation*} i.e. the expected squared jump distance would shrink and the dynamics could be described as an \textit{U-turn}. From these simulated states new proposals are sampled (for further details see [\cite{nuts}]). 
 \label{sec:HMC}
-\subsection{Bayesian approach to Additive Models}
+\subsection{Bayesian approach to additive models}
+Here the basic terminology related with additive models from a Bayesian perspective is recalled and the notation that will be used in the following is fixed. As a reference it is relied on [\cite{bayessm}]. \\
+To study additive models firstly an understanding of univariate polynomial smoothing is helpful. For $n$ observation-pairs $(x_i, y_i)$, where $y$ is the output and $x$ is its covariate, with univariate polynomial smoothing a \textit{polynomial spline} $f(x)$ can be found, which fulfils 
+\begin{equation}
+y_i = f(x_i) + \epsilon_i,
+\label{eq:polspline}
+\end{equation}
+where $\epsilon_i \sim \mathcal{N}(0,\sigma)$ for an Gaussian observation model. This polynomial spline $f$ of degree $D$ over $M+1$ (not necessarily equidistant) knots can be mathematically equivalent expressed in different spline bases, s.t.  
+\begin{equation}
+f(x) = \sum^K_{k=1}\gamma_k B_k(x),
+\label{eq:pbasis}
+\end{equation}
+where $K = D + M.$
+Commonly used spline bases are \textit{Truncated power series} and \textit{B-splines}. In this thesis the B-splines basis will be used, because of its superior numerical stability and its more adaptive Bayesian interpretation. Important to note is that B-splines form a local basis. With Eq. (\ref{eq:pbasis}) Eq. (\ref{eq:polspline}) can be written as a linear model for all observations, s.t.
+\begin{equation}
+\mathbf{y} = \mathbf{X} \mathbf{ \gamma } + \mathbf{\epsilon},
+\end{equation}
+where $\mathbf{X}$ contains the basis function evaluated at the observed covariate $\mathbf{x}$. \\
+With higher node (and polynomial) degree polynomial spines are more prone to overfitting. To counter this \textit{P-splines} are used. Because for B-splines $\mathbf{\gamma}$ represents local regression coefficients, high differences of neighbouring $\gamma_i$ should be penalized. Hence the so-called \textit{penalized least-squares} criterion can be formulated for B-splines with equidistant knots as
+\begin{equation}
+PLS(\lambda) = ||\mathbf{y} - \mathbf{X}\mathbf{\gamma}||^2_2 +
+ + \lambda||\mathbf{D}_d\mathbf{\gamma}||^2_2 = ||\mathbf{y} - \mathbf{X}\mathbf{\gamma}||^2_2 +
+ + \mathbf{\gamma}^T\underbrace{\mathbf{D}_d^T\mathbf{D}_d}_{=:\mathbf{K}}\mathbf{\gamma},
+\end{equation}
+where $\mathbf{D}_d \in \mathbb{R}^{(\mathbf{K}-d) \times \mathbf{K}}$ is the so-called \textit{difference matrix} of order $d$ and $\mathbf{K}$ the penalty matrix.
 \label{sec:AddMod}
 \pagebreak
 
