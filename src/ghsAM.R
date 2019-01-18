@@ -117,7 +117,7 @@ stan_params <- function(Y, scale_global, psplines=list(),X=matrix(nrow=1,ncol=0)
       }else{
         presp = psplines[[i-1]]
         startB[i] = startB[i-1] + length(presp$B)
-        startG[i] = starta[i-1] + presp$num_paramnd
+        startG[i] = startG[i-1] + presp$num_paramnd
         startK[i] = startK[i-1] + length(presp$K)
         startP1d[i] = startP1d[i-1] + dimSplines[i-1]
       }

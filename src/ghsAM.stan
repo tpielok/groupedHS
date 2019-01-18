@@ -39,8 +39,8 @@ parameters {
   real beta0; 
   real<lower=0> sigma; 
 
-  vector<lower=0>[num_splines] lambdaG; 
-  vector<lower=0>[num_groups] lambdaB; 
+  vector<lower=0>[num_splines-hasNoSF] lambdaG; 
+  vector<lower=0>[num_groups-hasNoLP] lambdaB; 
   vector[num_linparam-hasNoLP] z;
   real<lower=0> tau; 
 } 
