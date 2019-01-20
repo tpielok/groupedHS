@@ -19,10 +19,10 @@ dimParams <- function(Blist){
   i = 3
   ret[2] = 1
   for(B in Blist){
-       ret[2] = ret[2] * dim(B)[2] 
-       ret[i] = dim(B)[2]
-       i = i + 1
-       ret[1] = dim(B)[1]
+    ret[2] = ret[2] * dim(B)[2] 
+    ret[i] = dim(B)[2]
+    i = i + 1
+    ret[1] = dim(B)[1]
   }
   return(ret)
 }
@@ -192,7 +192,10 @@ stan_params <- function(Y, scale_global, psplines=list(),X=matrix(nrow=1,ncol=0)
     dimSplines = as.matrix(dimSplines),
     num_param1d = as.matrix(num_param1d),
     num_paramnd = as.matrix(num_paramnd),
-    rankK = as.matrix(rankK)
+    rankK = as.matrix(rankK),
+    
+    nu_global = 1,
+    nu_local = 1
   ))
 }
 
