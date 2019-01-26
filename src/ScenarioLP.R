@@ -15,9 +15,9 @@ num_dg  = length(glevels)
 
 sp_level = c(1, 2) # Level of sparsity
 
-SNR = c(0.1,0.5, 1, 5,10) # to tune
+#SNR = c(0.1,0.5, 1, 5,10) # to tune
 
-#SNR = c(0.1, 1, 5)
+SNR = c(0.1, 1, 5)
 
 beta_min = 1
 beta_max = 2

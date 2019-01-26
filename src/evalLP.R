@@ -2,6 +2,8 @@
 
 load("lp-results.RData")
 
+p0 = c(1,2,3)
+
 par(mfrow=c(length(sp_level),length(SNR)))
 
 for (cnt_sp in 1:length(sp_level)){
@@ -11,15 +13,25 @@ for (cnt_sp in 1:length(sp_level)){
       tmp = vector("numeric", num_innerLoops)
       for (ii in 1:num_innerLoops) {
         res = results[[cnt_sp]][[cnt_SNR]][[cnt_p0]][[ii]]
-        tmp[ii] = res$mse
+        tmp[ii] = res$
       }
       mses = c(mses, tmp)
     }
+    
+    if(res$sp == 1){
+      yl = "lo"
+    }else{
+      yl = "high"
+    }
+   
     boxplot(matrix(mses, ncol=length(p0)),
-            ylab=as.character(res$sp),
-            xlab=as.character(res$SNR))
+            ylab=yl,
+            xlab=paste("SNR",as.character(res$SNR)),
+            names=c("p1","p2","p3"))
+    mtext("MSE")
   }
 }
+
 
 par(mfrow=c(length(sp_level),length(SNR)))
 
@@ -36,12 +48,24 @@ for (cnt_sp in 1:length(sp_level)){
       }
       rmses = c(rmses, tmp1,tmp2)
     }
+
+    if(res$sp == 1){
+      yl = "lo"
+    }else{
+      yl = "high"
+    }
+    
     boxplot(matrix(rmses, ncol=2*length(p0)),
-            ylab=as.character(res$sp),
-            xlab=as.character(res$SNR))
+            ylab=yl,
+            xlab=paste("SNR",as.character(res$SNR)),
+            names=c("p1NZ","p1Z","p2NZ","p2Z","p3NZ","p1Z"))
+    mtext("Overall quality (param mse)")    
   }
 }
 
+
+
+for(i in 1:3){
 
 for (cnt_sp in 1:length(sp_level)){
   for (cnt_SNR in 1:length(SNR)) {
@@ -51,15 +75,31 @@ for (cnt_sp in 1:length(sp_level)){
       tmp2 = vector("numeric", num_innerLoops)
       for (ii in 1:num_innerLoops) {
         res = results[[cnt_sp]][[cnt_SNR]][[cnt_p0]][[ii]]
-        tmp1[ii] = res$rmse_levels[1,3]
-        tmp2[ii] = res$rmse_levels[2,3]
+        tmp1[ii] = res$rmse_levels[1,i]
+        tmp2[ii] = res$rmse_levels[2,i]
       }
       rmses = c(rmses, tmp1,tmp2)
     }
+    if(res$sp == 1){
+      yl = "lo"
+    }else{
+      yl = "high"
+    }
+    
+    if(i==1){
+      si = "small"
+    }else if(i==2){
+      si = "medium"
+    }else{
+      si = "big"
+    }
+    
     boxplot(matrix(rmses, ncol=2*length(p0)),
-            ylab=as.character(res$sp),
-            xlab=as.character(res$SNR))
+            ylab=yl,
+            xlab=paste("SNR",as.character(res$SNR)),
+            names=c("p1NZ","p1Z","p2NZ","p2Z","p3NZ","p1Z"))
+    mtext(paste(si,"group (param mse)"))
   }
 }
 
-
+}
