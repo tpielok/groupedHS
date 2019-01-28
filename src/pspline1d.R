@@ -44,7 +44,7 @@ collapseMatrices <- function(psplines, z) {
   for (i in 1:num) {
     pspline = psplines[[i]]
     Start[i] = Offset
-    Offset = Offset + Len[i]
+    Offset = Offset + length(psplines[[1]][[z]])
     End[i] = Offset - 1
     collapsed = c(collapsed, as.vector(pspline[[z]]))
   }
