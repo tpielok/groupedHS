@@ -39,6 +39,7 @@
   commentstyle=\color{ForestGreen},
 }
 
+\numberwithin{equation}{subsection}
 
 \begin{document}
 
@@ -183,12 +184,12 @@ $H$ is called a Hamiltonian if it holds that $\forall i \in \{1,\dots,d\}:$
 \frac{d \theta_i }{dt} = -\frac{\partial H}{\partial \rho_i}.
 \end{aligned}
 \end{equation}
-It can be shown that the Hamiltonian dynamics (\ref{eq:hamdym}) is reversible and preservers volume, which can even hold for the discretized version of the differential equations (see [\cite{mcmchb}]). With the \textit{leapfrog integrator}, which uses a discrete time step $\epsilon$, this can be achieved and (\ref{eq:hamdym}) can be solved numerically stable (see [\cite{mcmchb}]). Transitioning from a state $(\rho, \theta)$ to a new state $(\rho^*,\theta^*)$ in the leapfrog scheme, firstly a new  $\rho$ is drawn independently of $\theta$ and previous values of $\rho$ and secondly $L$ leapfrog steps are applied. One step of the leapfrog integrator can be summarized as follows:
+It can be shown that the Hamiltonian dynamics (\ref{eq:hamdym}) is reversible and preservers volume, which can even hold for the discretized version of the differential equations (see [\cite{mcmchb}]). With the \textit{leapfrog integrator}, which uses a discrete time step $\epsilon$, this can be achieved and Eq. (\ref{eq:hamdym}) can be solved numerically stable (see [\cite{mcmchb}]). Transitioning from a state $(\rho, \theta)$ to a new state $(\rho^*,\theta^*)$ in the leapfrog scheme, firstly a new  $\rho$ is drawn independently of $\theta$ and previous values of $\rho$ and secondly $L$ leapfrog steps are applied. One step of the leapfrog integrator can be summarized as follows:
 \begin{enumerate}
 \item The auxiliary variable $\rho$ is updated with half-step $\frac{\epsilon}{2}$ update using the negative derivative of the potential energy.
 \label{en:f}
 \item The parameter $\theta$ is updated with a full-step $\epsilon$ in the direction of the new $\rho$ multiplied with the derivative of the kinetic energy, which is represented by the covariance matrix $\Sigma$.
-\item Another half-step $\frac{\epsilon}{2}$ update of $\rho$ as in \ref{en:f} is performed.
+\item Another half-step $\frac{\epsilon}{2}$ update of $\rho$ as in Eq. \ref{en:f} is performed.
 \end{enumerate}  
 After $L$ leapfrog steps the proposal state $(\rho^*,\theta^*)$ is accepted as the new state with a probability of 
 \[\min(1, \exp(H(\rho, \theta)-H(\rho^*,\theta^*))).
@@ -302,17 +303,17 @@ To understand the properties of this model better a linear Gaussian regression m
 \mathbf{y} = U\beta + \epsilon.
 \label{eq:gaus}
 \end{equation}
-In the case of (\ref{eq:gaus}) if follows from (\ref{eq:hs}) that the prior distribution of $\beta$ is s.t. $\beta \sim N(0, \tau^2\Delta), $ where $\Delta$ is a diagonal matrix with $\lambda_i^2$ as its diagonal entries. By plugging these values into (\ref{eq:mubeta}) one gets that the posterior expected mean of $\beta$
+In the case of the linear Gaussian model (\ref{eq:gaus}) if follows from Eq. (\ref{eq:hs}) that the prior distribution of $\beta$ is s.t. $\beta \sim N(0, \tau^2\Delta), $ where $\Delta$ is a diagonal matrix with $\lambda_i^2$ as its diagonal entries. By plugging these values into Eq. (\ref{eq:mubeta}) one gets that the posterior expected mean of $\beta$
 \begin{equation}
 \mu_\beta = (\mathbf{U}^T\mathbf{U} + \sigma^2 \frac{1}{\tau^2}\Delta^{-1})^{-1}\mathbf{U}^T\mathbf{y}.
 \label{eq:mubetagaus}
 \end{equation}
-Since $\Delta$ is a diagonal matrix (\ref{eq:mubetagaus}) can be rewritten as 
+Since $\Delta$ is a diagonal matrix Eq. (\ref{eq:mubetagaus}) can be rewritten as 
 \begin{equation}
 \mu_\beta = \tau^2\Delta(\sigma^2(\mathbf{U}^T\mathbf{U} )^{-1} + \tau^2\Delta)^{-1}\underbrace{(\mathbf{U}^T\mathbf{U} )^{-1}\mathbf{U}^T\mathbf{y}}_{=:\hat{\beta}},
 \label{eq:mubetagausmax}
 \end{equation}
-where $\hat{\beta}$ denotes the maximum likelihood solution. In the case of zero mean and uncorrelated predictors with unit variance it holds that $\mathbf{U}^T\mathbf{U} \approx nI$, s.t. (\ref{eq:mubetagausmax}) can be component-wisely approximated as 
+where $\hat{\beta}$ denotes the maximum likelihood solution. In the case of zero mean and uncorrelated predictors with unit variance it holds that $\mathbf{U}^T\mathbf{U} \approx nI$, s.t. Eq. (\ref{eq:mubetagausmax}) can be component-wisely approximated as 
 \begin{equation}
 \mu_{\beta_j} = (1-\kappa_j)\hat{\beta}_j,
 \end{equation}
@@ -321,7 +322,7 @@ where
 \kappa_j = \frac{1}{1+n\sigma^{-2}\tau^2\lambda^2_j}
 \end{equation}
 is the so-called shrinkage factor for the j'th component of $\beta$. This name makes sense, since $n\sigma^{-2}\tau^2\lambda^2_j > 0$ it follows that $\kappa_j \in (0,1)$ and hence the limiting case of $\kappa = 1$ represents full shrinkage, where $\mu_{\beta_j} = 0$, and the other limiting case of $\kappa = 0$ no shrinkage, where $\mu_{\beta_j} = \hat{\beta}_j$.
-By using (\ref{eq:hs}) and applying the transformation theorem it can be shown, that the conditional density of $\kappa_j$
+By using Eq. (\ref{eq:hs}) and applying the transformation theorem it can be shown, that the conditional density of $\kappa_j$
 \begin{equation}
 p(\kappa_j|\;\tau,\sigma) = \frac{1}{\pi}\frac{\sigma^{-1}\tau\sqrt{n}}{(n\sigma^{-2}\tau^2 - 1)\kappa_j + 1}\frac{1}{\sqrt{\kappa_j}\sqrt{1-\kappa_j}}. 
 \label{eq:kappa}
@@ -343,19 +344,19 @@ In additive models two natural group structures arise:
 \item A categorical predictor with $m_{G_1}$ levels can be modelled with $m_{G_1} -1$ dummy coded variables, which represent a group of $m_{G_1} - 1$ linear predictors.
 \item A smoothing function with parameter $\mathbf{\gamma} \in \mathbb{R}^{K_1}$ also can be seen as a group of $K_1$ parameters. 
 \end{enumerate}
-Because one usually wants a smooth function defined on the whole domain and does not want to select categorical predictors level-wise, the horseshoe prior can be straightforwardly extended for this grouped structures, s.t. for an additive model as defined in (\ref{eq:am}), where the $g$ linear predictors are categorical with number of levels $m_{G_i}$ and where the parameter vector $\gamma_j \in \mathbb{R}^{K_j}$ of the $m_s$ smoothing functions,
+Because one usually wants a smooth function defined on the whole domain and does not want to select categorical predictors level-wise, the horseshoe prior can be straightforwardly extended for this grouped structures, s.t. for an additive model as defined in Eq. (\ref{eq:am}), where the $g$ linear predictors are categorical with number of levels $m_{G_i}$ and where the parameter vector $\gamma_j \in \mathbb{R}^{K_j}$ of the $m_s$ smoothing functions,
 \begin{align}
 \beta|\; \sigma^2,\tau^2, \lambda^2_{11},\dots,\lambda^2_{1g} \sim N(0, \sigma^2\tau^2\mathbf{D}_{\lambda_1}),\\
 \forall j \in  \{1,\dots,m_s\}\quad \gamma_j  \sim N(0, \tau^2\lambda_{2j}^2\mathbf{K}_j),
 \end{align}
 where $\mathbf{D}_{\lambda_1} = \text{diag}(\lambda_{11}^2I_{m_{G_1}},\dots,\lambda_{1g}^2I_{m_{G_g}})$ and 
 \begin{align*}
-\lambda_{1i}|\;\tau \sim C^+(0,\tau), \quad \lambda_{2i}|\;\tau \sim C^+(0,\tau), \quad \tau^ \sim C^+(0,1).
+\lambda_{1i}|\;\tau \sim \text{C}^+(0,\tau), \quad \lambda_{2i}|\;\tau \sim \text{C}^+(0,\tau), \quad \tau \sim \text{C}^+(0,1).
 \end{align*}
 This means every group structure has one local shrinkage parameter. Hence the whole group is either shrunken as a whole or stays not shrunken.
 \subsection{Hyperprior choice for global shrinkage parameter}
 \label{sec:opt}
-In [\cite{horseshoe}] it is shown that for the global shrinkage parameter the choice of scale 1 can produce suboptimal results  in settings where $\tau$ can not well be identified by the data, e.g high ratio of number of parameter to number of data or very noisy data. Hence the authors propose to introduce $\tau_0$ as an hyper-parameter, s.t. $\tau \sim C^+(0,\tau_0)$ and show that an good way to choose this parameter is by using an guess of the number of relevant variables $p_0$ of of all the $D$ to be shrunken variables, s.t.
+In [\cite{horseshoe}] it is shown that for the global shrinkage parameter the choice of scale 1 can produce suboptimal results  in settings where $\tau$ can not well be identified by the data, e.g high ratio of number of parameter to number of data or very noisy data. Hence the authors propose to introduce $\tau_0$ as an hyper-parameter, s.t. $\tau \sim \text{C}^+(0,\tau_0)$ and show that an good way to choose this parameter is by using an guess of the number of relevant variables $p_0$ of of all the $D$ to be shrunken variables, s.t.
 \begin{equation}
 \tau_0 = \frac{p_0}{D-p_0}\frac{\sigma}{\sqrt{n}}.
 \label{eq:tau0}
@@ -367,20 +368,22 @@ From the prior distribution of $\kappa_{ij}$ (\ref{eq:kappa}) it follows that
 \begin{equation}
 \mathbb{E}(\kappa_{ij}|\; \tau, \sigma) = \underbrace{\frac{1}{1+\sigma^{-1}\tau\sqrt{n}}}_{=:\mu_\kappa}.
 \end{equation}
-Since $\kappa_{ij}$ is typically is either near zero or near one it motivates the definition of effective number of parameter $m_{\text{eff}}$ as 
+Since $\kappa_{ij}$ is typically either near zero or near one it motivates the definition of effective number of parameter $m_{\text{eff}}$ as 
 \begin{equation}
 m_{\text{eff}} = \sum^g_{i=1}(1-\kappa_{1i})m_{G_i} + \sum^{m_s}_{j=1}(1-\kappa_{2j})K_j.
 \label{eq:meff}
 \end{equation}
-By taking the expectation of (\ref{eq:meff}) it follows that
+By taking the expectation of Eq. (\ref{eq:meff}) it follows that
 \begin{equation}
 \mathbb{E}(m_{\text{eff}}|\; \tau, \sigma) = (1-\mu_\kappa)\underbrace{( \sum^g_{i=1}m_{G_i} + \sum^{m_s}_{j=1}K_j)}_{=: D} = \frac{\sigma^{-1}\tau\sqrt{n}}{1+\sigma^{-1}\tau\sqrt{n}}D.
 \label{eq:meffg}
 \end{equation}
-By solving (\ref{eq:meffg}) for $\tau$ for an guess of the effective number of parameter $p_0$ the same proposal as presented in (\ref{eq:tau0}) is derived. The integration of $\tau_0$ in the model can be done in other ways than using $\tau \sim C^+(0,\tau_0)$, e.g. fixing $\tau$ to $\tau_0$ or using $\tau \sim N^+(0,\tau_0)$. The effects of these other approaches are discussed in [\cite{horseshoe}].
+By solving Eq. (\ref{eq:meffg}) for $\tau$ for an guess of the effective number of parameter $p_0$ the same proposal as presented in Eq. (\ref{eq:tau0}) is derived. The integration of $\tau_0$ in the model can be done in other ways than using $\tau \sim \text{C}^+(0,\tau_0)$, e.g. fixing $\tau$ to $\tau_0$ or using $\tau \sim N^+(0,\tau_0)$. The effects of these other approaches are discussed in [\cite{horseshoe}].
 \subsection{Practical aspects}
 \label{sec:pract}
-
+When using NUTS (\ref{sec:HMC}) for 
+[\cite{reparam}]
+[\cite{paramprob}]
 \pagebreak
 
 \section{Simulations}
