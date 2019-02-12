@@ -13,7 +13,7 @@ for (cnt_sp in 1:length(sp_level)){
       tmp = vector("numeric", num_innerLoops)
       for (ii in 1:num_innerLoops) {
         res = results[[cnt_sp]][[cnt_SNR]][[cnt_p0]][[ii]]
-        tmp[ii] = res$
+        tmp[ii] = res$mse
       }
       mses = c(mses, tmp)
     }
@@ -31,6 +31,7 @@ for (cnt_sp in 1:length(sp_level)){
     mtext("MSE")
   }
 }
+
 
 
 par(mfrow=c(length(sp_level),length(SNR)))

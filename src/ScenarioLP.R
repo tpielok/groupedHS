@@ -88,7 +88,7 @@ for (cnt_sp in 1:length(sp_level)) {
         
         #df$Y = Y
         
-        #lm(Y ~ ., data=df)
+        oracle = lm(Y ~ ., data=df)
         
         tau0 = cur_p0 / (sqrt(n) * (length(betas) - cur_p0))
         s_p = stan_params(
@@ -152,6 +152,9 @@ for (cnt_sp in 1:length(sp_level)) {
         mean_y = mean(Y)
         sd_y   = sd(Y)
         mse    = sqrt(mean((Y_test - Y_est) ^ 2))
+        
+        df = data.frame()
+        
         result = list(
           "rmse_nz" = rmse_nonzero,
           "rmse_z" = rmse_zero,

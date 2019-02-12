@@ -235,3 +235,35 @@ if (FALSE) {
   
   plot(density(rowSums(esp$f) + esp$beta0 - Y_true))
 }
+
+nv = 1000000
+n = 6
+d = 5
+p = penaltyMatrix(d,n)
+e = eigen(p)
+ev = e$vectors
+D1 = t(ev)%*%p%*%ev
+
+D2 = D1[1:(n-d),1:(n-d)]
+if(n-d == 1){
+  tmp = mvrnorm(nv, 1, as.matrix(1))
+  tmp = tmp %*% matrix(1/sqrt(D2))
+  #tmp = mvrnorm(nv, rep(0,n-d), as.matrix(1/D2))
+}else{
+  tmp = mvrnorm(nv, rep(0,n-d), diag(n-d))
+  tmp =  tmp %*% t(Re(sqrtm(inv(D2)))) 
+  #tmp = mvrnorm(nv, rep(0,n-d), inv(D2))
+}
+res = matrix(0,nv,n)
+res[1:nv,1:(n-d)] = tmp
+
+ksqr = t(Re(sqrtm(p))) %*% ev
+x = (res %*% t(ev)) %*% ksqr
+round(cov(x),6)
+
+ksqr %*% t(ksqr)
+
+rep(0,n-d)
+round(t(e$vectors)%*%p%*%e$vectors,digits = 6)
+
+inv(penaltyMatrix(1,5))

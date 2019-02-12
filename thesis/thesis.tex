@@ -225,7 +225,7 @@ With higher node (and polynomial) degree polynomial splines are more prone to ov
 PLS(\lambda) = ||\mathbf{y} - \mathbf{X}\mathbf{\gamma}||^2_2 +
  \lambda||\mathbf{D}_d\mathbf{\gamma}||^2_2 = ||\mathbf{y} - \mathbf{X}\mathbf{\gamma}||^2_2 +  \lambda\mathbf{\gamma}^T\underbrace{\mathbf{D}_d^T\mathbf{D}_d}_{=:\mathbf{K}}\mathbf{\gamma},
 \end{equation}
-where $\mathbf{D}_d \in \mathbb{R}^{(\mathbf{K}-d) \times \mathbf{K}}$ is the so-called \textit{difference matrix} of order $d$ and $\mathbf{K}$ the penalty matrix. The PLS criterion can be equivalently defined by using a $d^{\text{th}}$ random walk prior distribution for $\mathbf{\gamma}$, s.t. 
+where $\mathbf{D}_d \in \mathbb{R}^{K-d) \times K}$ is the so-called \textit{difference matrix} of order $d$ and $\mathbf{K}$ the penalty matrix. The PLS criterion can be equivalently defined by using a $d^{\text{th}}$ random walk prior distribution for $\mathbf{\gamma}$, s.t. 
 \begin{align}
 \begin{split}
 p(\mathbf{\gamma}, \sigma^2 | \; \mathbf{y}) & \propto  p(\mathbf{y} | \; \mathbf{\gamma}, \sigma^2) p(\mathbf{\gamma} | \; \tau^2) p(\sigma^2) p(\tau^2) \\
@@ -233,12 +233,27 @@ p(\mathbf{\gamma}, \sigma^2 | \; \mathbf{y}) & \propto  p(\mathbf{y} | \; \mathb
 (\frac{1}{\tau^2})^{\text{rank}(\mathbf{K})/2}\exp(-\frac{1}{2\tau^2}\mathbf{\gamma}^T\mathbf{K}\mathbf{\gamma}) \cdot \\
  &  \quad\cdot p(\sigma^2) p(\tau^2),
 \end{split}
+\label{eq:gamma1}
 \end{align}
 where typically prior distributions of $\sigma^2$ and $\tau^2$ are chosen, s.t. 
 \begin{equation}
 \sigma^2 \sim \text{IG}(a_\sigma, b_\sigma), \tau^2 \sim \text{IG}(a, b).
 \end{equation}
-Note because $\mathbf{K}$ has no full rank, which can be clearly seen from its construction, this means that for $\mathbf{\gamma}$ a degenerate Gaussian distribution is assumed. \\
+Note because $\mathbf{K}$ has no full rank, which can be clearly seen from its construction, this means that for $\mathbf{\gamma}$ a degenerate Gaussian distribution is assumed. 
+By introducing a parameter $\mathbf{u}$, for which it holds that \begin{equation}
+\mathbf{u} = \underbrace{\begin{bmatrix}I_{d} & 0 \\ 0 &\mathbf{D}_d\end{bmatrix}}_{=:S}\gamma,
+\label{eq:urp}
+\end{equation} 
+i.e. the first $d$ terms are the first $d$ terms of $\gamma$ and the last $K-d$ terms the $d$'th differences of $\gamma$, Eq. (\ref{eq:gamma1}) can be reparametrized as 
+\begin{equation}
+\begin{split}
+p(\mathbf{u}, \sigma^2 | \; \mathbf{y}) & \propto  p(\mathbf{y} | \; \mathbf{u}, \sigma^2) p(\mathbf{u} | \; \tau^2) p(\sigma^2) p(\tau^2) \\
+& \propto  \exp(-\frac{1}{2\sigma^2}||\mathbf{y} - \mathbf{X}S^{-1}\mathbf{u}||^2_2)
+p(\mathbf{u}|\;\tau) \\
+ &  \quad\cdot p(\sigma^2) p(\tau^2),
+\end{split}
+\end{equation}
+where $\mathbf{u}|\;\tau^ \sim N(0,\tau^2 \mathbf{Z})$ with diagonal covariance matrix $\mathbf{Z}$. \\
 Now considering the case of multiple covariates $\mathbf{x}_1, \dots , \mathbf{x}_p$ for an output $\mathbf{y} \in \mathbb{R}^n$ it is possible to extend the smoothing splines analogously to this multivariate setting, but by doing this the number of parameter rises quickly and so does the amount of data, which would be needed to identify these. Hence one commonly used technique is to restrict the model to an additive structure, s.t. the so-called additive model\footnote{In this thesis only additive model containing one dimensional splines will be used, but in general additive model can be also composed from higher dimensional smoothing functions.} for $\mathbf{y}$ can be written as
 \begin{equation}
 \mathbf{y} = \mathbf{U}\mathbf{\beta} +  \sum^{m_s}_{i=1} \mathbf{f}_i(\mathbf{x}_i) + \mathbf{\epsilon},
@@ -277,14 +292,20 @@ p(\gamma_1,\dots ,\gamma_{m_s},\mathbf{\beta},\tau^2_1,\dots,\tau^2_{m_s},\sigma
 & \prod^{m_s}_{i=1}  p(\tau^2_i)  \cdot  p(\sigma^2),
 \end{split}
 \end{align}
-i.e. the posterior mean is consistent with the PLS criterion. Typically a weakly informative prior distribution is used for $\mathbf{\beta}$, s.t. $\mathbf{\beta} \sim N(\mathbf{c},\mathbf{C})$, where $\mathbf{C}$ is a 'large' covariance matrix. Because in this setting the sample density of $\mathbf{y}$ is normal and by using the fact that the normal distribution is a conjugate family for these, it can be easily shown that the full conditionals $\mathbf{\beta} |\; \cdot \sim N(\mu_\beta, \Sigma_\beta)$ with
+i.e. the posterior mean is consistent with the PLS criterion. Typically a weakly informative prior distribution is used for $\mathbf{\beta}$, s.t. $\mathbf{\beta} \sim N(\mathbf{c},\mathbf{C})$, where $\mathbf{C}$ is a 'large' covariance matrix. Because in this setting the sample density of $\mathbf{y}$ is normal and by using the fact that the normal distribution is a conjugate family for these, it can be easily shown that the full conditional $\mathbf{\beta} |\; \cdot \sim N(\mu_\beta, \Sigma_\beta)$ with
 \begin{align}
 \Sigma_\beta = \sigma^2(\mathbf{U}^T\mathbf{U} + \sigma^2 \mathbf{C}^{-1})^{-1}, \\
-\mu_\beta = \frac{1}{\sigma^2}\Sigma_\beta(U^T(\mathbf{y} - \eta + \mathbf{U}\mathbf{\beta}) + \sigma^2\mathbf{C}^{-1}\mathbf{c}).
+\mu_\beta = \frac{1}{\sigma^2}\Sigma_\beta(\mathbf{U}^T(\mathbf{y} - \eta + \mathbf{U}\mathbf{\beta}) + \sigma^2\mathbf{C}^{-1}\mathbf{c}).
 \label{eq:mubeta}
 \end{align}
-
-
+In a similar fashion for the reparametrization (\ref{eq:urp}) it can be shown that for $\mathbf{u}_l = T_l\mathbf{\gamma}_l$ it holds that $\mathbf{u}_l |\; \cdot \sim N(\mu_{u_l}, \Sigma_{u_l})$ with
+\begin{align}
+%todo check%
+\Sigma_{u_l} = \sigma^2(\tilde{\mathbf{X}}_l^T\tilde{\mathbf{X}}_l + \frac{\sigma^2}{\tau_l} \mathbf{Z}_l^{-1})^{-1}, \\
+\mu_{u_l} = \frac{1}{\sigma^2}\Sigma_{u_l}\tilde{\mathbf{X}}_l^T(\mathbf{y} - \sum^{m_s}_{i=1,i\neq l} \tilde{\mathbf{X}}_i\mathbf{u}_i - \mathbf{U}\mathbf{\beta}),
+\label{eq:muU}
+\end{align}
+where $\tilde{\mathbf{X}}_l = \mathbf{X}_lS^{-1}_l$.
 \label{sec:AddMod}
 \pagebreak
 
@@ -342,12 +363,12 @@ For $n\sigma^{-2}\tau^2 = 1$ it holds that $\kappa_j \sim \text{Beta}(\frac{1}{2
 In additive models two natural group structures arise:
 \begin{enumerate}
 \item A categorical predictor with $m_{G_1}$ levels can be modelled with $m_{G_1} -1$ dummy coded variables, which represent a group of $m_{G_1} - 1$ linear predictors.
-\item A smoothing function with parameter $\mathbf{\gamma} \in \mathbb{R}^{K_1}$ also can be seen as a group of $K_1$ parameters. 
+\item A smoothing function with parameter $\mathbf{u} \in \mathbb{R}^{K_1}$ also can be seen as a group of $K_1$ parameters. 
 \end{enumerate}
-Because one usually wants a smooth function defined on the whole domain and does not want to select categorical predictors level-wise, the horseshoe prior can be straightforwardly extended for this grouped structures, s.t. for an additive model as defined in Eq. (\ref{eq:am}), where the $g$ linear predictors are categorical with number of levels $m_{G_i}$ and where the parameter vector $\gamma_j \in \mathbb{R}^{K_j}$ of the $m_s$ smoothing functions,
+Because one usually wants a smooth function defined on the whole domain and does not want to select categorical predictors level-wise, the horseshoe prior can be straightforwardly extended for this grouped structures, s.t. for an additive model as defined in Eq. (\ref{eq:am}), where the $g$ linear predictors are categorical with number of levels $m_{G_i}$ and where the parameter vector $\mathbf{u}_j \in \mathbb{R}^{K_j}$ of the $m_s$ smoothing functions,
 \begin{align}
 \beta|\; \sigma^2,\tau^2, \lambda^2_{11},\dots,\lambda^2_{1g} \sim N(0, \sigma^2\tau^2\mathbf{D}_{\lambda_1}),\\
-\forall j \in  \{1,\dots,m_s\}\quad \gamma_j  \sim N(0, \tau^2\lambda_{2j}^2\mathbf{K}_j),
+\forall j \in  \{1,\dots,m_s\}\quad \mathbf{u}_j|\; \tau, \lambda_{2j}  \sim N(0, \tau^2\lambda_{2j}^2\mathbf{Z}_j),
 \end{align}
 where $\mathbf{D}_{\lambda_1} = \text{diag}(\lambda_{11}^2I_{m_{G_1}},\dots,\lambda_{1g}^2I_{m_{G_g}})$ and 
 \begin{align*}
@@ -364,7 +385,7 @@ In [\cite{horseshoe}] it is shown that for the global shrinkage parameter the ch
 In this thesis it will be shown, that this choice of $\tau_0$ is still reasonable in the setting of grouped variables as discussed in section \ref{sec:hsg}: \\
 Now consider the grouped variables setting of section \ref{sec:hsg}. 
 Every group has its own local shrinkage coefficient $\kappa_{ij}$.
-From the prior distribution of $\kappa_{ij}$ (\ref{eq:kappa}) it follows that
+From the prior distribution of $\kappa_{ij}$ (\ref{eq:kappa})\footnote{Since the structures of Eq. (\ref{eq:mubeta}) and Eq. (\ref{eq:muU}) are similar and $\mathbf{Z}$ is a diagonal covariance matrix the derivation of $\kappa$ in the setting of a smooth function can be carried out in the same manner as in section (\ref{sec:mfound}).} it follows that
 \begin{equation}
 \mathbb{E}(\kappa_{ij}|\; \tau, \sigma) = \underbrace{\frac{1}{1+\sigma^{-1}\tau\sqrt{n}}}_{=:\mu_\kappa}.
 \end{equation}
@@ -378,7 +399,7 @@ By taking the expectation of Eq. (\ref{eq:meff}) it follows that
 \mathbb{E}(m_{\text{eff}}|\; \tau, \sigma) = (1-\mu_\kappa)\underbrace{( \sum^g_{i=1}m_{G_i} + \sum^{m_s}_{j=1}K_j)}_{=: D} = \frac{\sigma^{-1}\tau\sqrt{n}}{1+\sigma^{-1}\tau\sqrt{n}}D.
 \label{eq:meffg}
 \end{equation}
-By solving Eq. (\ref{eq:meffg}) for $\tau$ for an guess of the effective number of parameter $p_0$ the same proposal as presented in Eq. (\ref{eq:tau0}) is derived. The integration of $\tau_0$ in the model can be done in other ways than using $\tau \sim \text{C}^+(0,\tau_0)$, e.g. fixing $\tau$ to $\tau_0$ or using $\tau \sim N^+(0,\tau_0)$. The effects of these other approaches are discussed in [\cite{horseshoe}].
+By solving Eq. (\ref{eq:meffg}) for $\tau$ for an guess of the effective number of parameter $p_0$ the same proposal as presented in Eq. (\ref{eq:tau0}) is derived. The suggested integration of $\tau_0$ in the model is done by using $\tau \sim \text{C}^+(0, \tau_0)$, because then the median of $\tau = \tau_0$ and the heavy tails of the half-cauchy distribution allows for a higher adaptivity to the data. The integration can be done in other ways than using $\tau \sim \text{C}^+(0,\tau_0)$, e.g. fixing $\tau$ to $\tau_0$ or using $\tau \sim N^+(0,\tau_0)$. The effects of these other approaches are discussed in [\cite{horseshoe}].
 \subsection{Practical aspects}
 \label{sec:pract}
 When using NUTS (\ref{sec:HMC}) for 
@@ -396,30 +417,26 @@ When using NUTS (\ref{sec:HMC}) for
 \subsection{Szenario 2}
 \subsubsection{Data generation}
 \subsubsection{Results}
-
-\subsection{Summary}
 \pagebreak
 
-%\section{Benchmarking}
+\section{Benchmarking}
 
-%\subsection{Regression}
-%\subsubsection{Data description}
-%\subsubsection{Comparisions and Results}
-%\subsection{Classification}
-%\subsubsection{Data description}
-%\subsubsection{Comparisions and Results} 
-
-\subsection{Summary}
+\subsection{Boston housing}
+\subsubsection{Data description}
+\subsubsection{Comparisions and Results}
+\subsection{MPG}
+\subsubsection{Data description}
+\subsubsection{Comparisions and Results}
 
 \pagebreak
 
 \section{Conclusions}
 \pagebreak
 \section{Appendix}
-\subsection{Other variable selection methods}
-\subsubsection{Spike-and-slab variable selection}
-\subsubsection{Feature selection using LASSO}
-\pagebreak
+%\subsection{Other variable selection methods}
+%\subsubsection{Spike-and-slab variable selection}
+%\subsubsection{Feature selection using LASSO}
+%\pagebreak
 \subsection{Code}
 \pagebreak
 
