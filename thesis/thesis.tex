@@ -12,7 +12,8 @@
 \usepackage{mathtools}
 \pagestyle{empty}        
 
-
+\usepackage{datetime}
+\newdate{date}{27}{02}{2019}
 \usepackage{booktabs}    
 \usepackage{natbib}      
 \usepackage{bibentry}   
@@ -67,7 +68,7 @@
 \begin{center}
   Author:\\
   \begin{large}
-    Tobias Pielok\\
+    Tobias Pielok, B.Sc. (TUM)\\
   \end{large}
 \end{center}
 \vspace{1cm}
@@ -78,21 +79,11 @@
 \end{center}
 
 \begin{center}  \begin{large}
-    Submission date: \\%\date{\today} \\
+    Submission date: \showdowfalse\displaydate{date} \\
   \end{large}
 \end{center}
 
 \vspace{1,5cm}
-
-\begin{center}
-  \begin{large}
-    \author{Tobias Pielok, B.Sc. (TUM)}\\
- \end{large}
-  Marchgrabenplatz 5\\ 
-  80805 Munich\\ 
-  \url{t.pielok@campus.lmu.de}\\
-  Matrikelnr.:  11381351\\
-\end{center}
 
 \newpage
 \section*{Acknowledgement}
@@ -474,7 +465,7 @@ The DGP of this setting can be described as follows:
 \end{itemize}
 The predictive MSE is evaluated on test data sets with 5000 observations. The quality of shrinkage is compared with the MSE of the parameter estimates $\hat{\beta}_i$, which is defined as
 \[
-\frac{1}{m}\sum^n_{i=1}|\beta - \hat{\beta}_i|^2_2.
+\frac{1}{m}\sum^m_{i=1}|\beta - \hat{\beta}_i|^2_2.
 \]
 \subsubsection{Results}
 \label{sec:lpres}
@@ -550,7 +541,7 @@ The DGP of this setting can be described as follows:
 \end{itemize}
 The predictive MSE is evaluated on test data sets with 5000 observations. The quality of shrinkage is compared with the MSE of the estimated function outputs$\hat{f}_i$, which is defined as
 \[
-\frac{1}{m}\sum^n_{i=1}|f - \hat{f}_i|^2_2.
+\frac{1}{m}\sum^m_{i=1}|f - \hat{f}_i|^2_2.
 \]
 \label{sec:sfdgp}
 \subsubsection{Results}
@@ -610,7 +601,7 @@ To create two levels of artificial sparsity in the data the 10 predictors are 1-
 For this simulation 3 different horseshoe priors are evaluated with $p_0 = 0.1D, 0.25D, 0.5D$ (note, that $D$ changes with added sparsity).  For every prior 4 chains with a size of 200 elements are simulated. Default setting consisting of 3 chains of length 500 are used for spikeSlabGAM. The regularization parameter $\lambda$ of gglasso is chosen from 100 5-fold cross validations.
 The performance of these methods is compared with their RMSEs, which are drawn from 50 valid\footnote{A split is accepted, if the test data contains only  levels, which are also present in the training data.}  shuffle splits, i.e. 50 times the data set is randomly divided into training and test data with ratio 4:1. \\
 In Fig. (\ref{fig:am-mse}) it can be observed that the horseshoe priors differ only slightly for all levels of shrinkage.
-Since for the unaltered data the RMSEs of the grouped horseshoe priors and the linear model follow a similar distribution, it is assumed that the data is not sparse. All methods seem to be robust against higher levels of sparsity, except for the linear model as one would expect. For this data set the groups horseshoe priors perform best in terms of the RMSE, followed by spikeSlabGAM. Only for sparsity two-times heightened is the performance of gglasso better than the linear model, but still worse than the Bayesian approaches.
+Since for the unaltered data the RMSEs of the grouped horseshoe priors and the linear model follow a similar distribution, it is assumed that the data is not sparse. All methods seem to be robust against higher levels of sparsity, except for the linear model as one would expect. For this data set the groups horseshoe priors perform best in terms of the RMSE, followed by spikeSlabGAM. Only for sparsity two-times heightened the performance of gglasso is better than the linear model, but still worse than the Bayesian approaches.
 \FloatBarrier
 \subsection{Boston housing}
 \label{sec:bn}
@@ -637,7 +628,7 @@ Since the GAM performs better in terms of RMSE than the linear model as it can b
 \FloatBarrier
 \section{Conclusions}
 As this thesis shows the grouped horseshoe priors are able to estimate robustly point estimates. It is especially robust comparably to the other presented methods against different levels of sparsity as it can be seen in the simulation study (\ref{sec:sf}) and the benchmarks (\ref{sec:benchmark}).
-The linear predictor simulation (\ref{sec:lp}) suggests that there is an influence of the size of the groups, which should be investigated further. For this thesis the parametrization $u$ of $\gamma$ as shown in section (\ref{sec:AddMod}) was used. The influence of choosing an other parametrization could be investigated. Also more studies could be done of when a chain is sufficiently long for a good point estimate, since it could be shown in (\ref{sec:am}) that chains of only length 100 produced competitive results. In most cases the hyperparameter choice did not affect the performance in terms of predictive MSE, but in some data situations the \textit{optimal} prior offered a good comprise between estimation error of the zero and non-zero influence variables, as it could be seen in section (\ref{sec:lp}).\\
+The linear predictor simulation (\ref{sec:lp}) suggests that there is an influence of the size of the groups, which should be investigated further. For this thesis the parametrization $u$ of $\gamma$ as shown in section (\ref{sec:AddMod}) was used. The influence of choosing an other parametrization could be investigated. Also more studies could be done of when a chain is sufficiently long for a good point estimate, since it could be shown in (\ref{sec:am}) that chains of only length 200 produced competitive results. In most cases the hyperparameter choice did not affect the performance in terms of predictive MSE, but in some data situations the \textit{optimal} prior offered a good comprise between estimation error of the zero and non-zero influence variables, as it could be seen in section (\ref{sec:lp}).\\
 Also it must be noted that a drawback of using the full Bayesian Inference is that it is quite time-consuming as compared to frequentist methods like gglasso or GAMSEL.  \\
 Overall the results of the grouped horseshoe priors look promising and more work should be invested in extending it to the general additive model case and to a broader family of smooth functions. 
 \pagebreak

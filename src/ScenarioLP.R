@@ -1,49 +1,19 @@
-library("rstan")
-source("./ghsAM.R")
-
-rstan_options(auto_write = TRUE)
-options(mc.cores = parallel::detectCores())
-sm = stan_model("ghsAM.stan")
-
-resfile = "lp-results.RData"
-
-n = 100 # to tune
-n_train = 50
-
-glevels = c(3, 5, 9)
-num_dg  = length(glevels)
-
-sp_level = c(1, 2) # Level of sparsity
-
-#SNR = c(0.1,0.5, 1, 5,10) # to tune
-
-SNR = c(0.1, 1, 5)
-
+glevels = c(3, 5, 9)         # how many levels per group (small, medium, large)
+num_dg  = length(glevels)    # number of different groups
 beta_min = 1
 beta_max = 2
 
-num_innerLoops = 100
-
-templ_betas = vector("numeric", 0)
-templ_group_ids = vector("numeric", 0)
-
-i = 1
-for (gl in glevels) {
-  templ_betas = c(templ_betas, seq(beta_min, beta_max, length.out = gl - 1))
-  templ_group_ids = c(templ_group_ids, rep(i, gl - 1))
-  i = i + 1
-}
-
-num_p0 = 3
-
-#results = l <- vector("list",num_p0 * length(sp_level) * length(SNR) * num_innerLoops)
-seed_cnt = 1
-
-results = vector("list", length(sp_level))
-
-
-for (cnt_sp in 1:length(sp_level)) {
-  cur_sp_level = sp_level[cnt_sp]
+createGroupedCoefs <- function(dgp, cur_sp_level) {
+  # create betas depending on group size and level of sparsity
+  templ_betas = vector("numeric", 0)
+  templ_group_ids = vector("numeric", 0)
+  
+  i = 1
+  for (gl in glevels) {
+    templ_betas = c(templ_betas, seq(beta_min, beta_max, length.out = gl - 1))
+    templ_group_ids = c(templ_group_ids, rep(i, gl - 1))
+    i = i + 1
+  }
   
   num_nonzero = length(templ_betas)
   betas = vector("numeric", 0)
@@ -51,137 +21,216 @@ for (cnt_sp in 1:length(sp_level)) {
   
   betas = c(templ_betas, rep(0, num_nonzero * cur_sp_level))
   
-  p0 = c(1, num_nonzero, length(betas) - 1)
-  
   group_ids = templ_group_ids
   for (i in 1:cur_sp_level) {
     group_ids = c(group_ids, templ_group_ids + i * num_dg)
   }
   
-  num_groups = (cur_sp_level + 1) * num_dg
-  
-  results[[cnt_sp]] = vector("list", length(SNR))
-  
-  for (cnt_SNR in 1:length(SNR)) {
-    cur_SNR = SNR[cnt_SNR]
-    results[[cnt_sp]][[cnt_SNR]] = vector("list", length(p0))
-    for (cnt_p0 in 1:length(p0)){
-      cur_p0 = p0[cnt_p0]
-      results[[cnt_sp]][[cnt_SNR]][[cnt_p0]] = vector("list", num_innerLoops)
-      for (ii in 1:num_innerLoops) {
-        
-        set.seed(seed_cnt)
-        inpMat = matrix(nrow = n, ncol = num_dg * (1 + cur_sp_level))
-        for (i in 1:ncol(inpMat)) {
-          inpMat[, i] = as.character(sample(1:glevels[((i - 1) %% num_dg) + 1], n, TRUE))
-        }
-        
-        df = data.frame(inpMat)
-        mM = model.matrix( ~ ., df)
-        X = mM[, 2:ncol(mM)] # Intercept gets estimated seperately
-        
-        eta = X[1:n_train, ] %*% betas
-        
-        sd_eta = sqrt(n_train / (n_train - 1)) * sd(eta)
-        
-        Y = eta + rnorm(n_train, 0, sd_eta ^ 2 / cur_SNR)
-        
-        #df$Y = Y
-        
-        oracle = lm(Y ~ ., data=df)
-        
-        tau0 = cur_p0 / (sqrt(n) * (length(betas) - cur_p0))
-        s_p = stan_params(
-          Y = Y[, 1],
-          scale_global = tau0,
-          X = X[1:n_train, ],
-          group_ids = group_ids,
-          num_groups = num_groups
-        )
-        
-        ptm <- proc.time()
-        fit = sampling(
-          sm,
-          data = s_p,
-          iter = 500,
-          control = list(adapt_delta = 0.99),
-          seed = seed_cnt,
-          sample_file=tempdir()
-        )
-        elapsedTime = (proc.time() - ptm)[3]
-        
-        la = extract(fit, permuted = TRUE)
-        
-        beta_est = colMeans(la$beta)
-        
-        res = betas - beta_est
-        sq_res = (res) ^ 2
-        
-        rmse_nonzero = sqrt(mean(sq_res[1:num_nonzero]))
-        rmse_zero    = sqrt(mean(sq_res[(num_nonzero + 1):length(sq_res)]))
-        
-        rmse_levels = matrix(nrow = 2, ncol = num_dg) # 1: nonzero 2: zero
-        me_levels =  matrix(nrow = 2, ncol = num_dg) # 1: nonzero 2: zero
-        
-        sq_res = matrix(sq_res, nrow = cur_sp_level + 1, byrow = TRUE)
-        res = matrix(res, nrow = cur_sp_level + 1, byrow = TRUE)
-        
-        offset = 1
-        for (l in 1:num_dg) {
-          rmse_levels[1, l] = sqrt(mean(sq_res[1, offset:(offset + glevels[l] - 2)]))
-          me_levels[1, l] = mean(res[1, offset:(offset + glevels[l] - 2)])
-          
-          rmse_levels[2, l] =  sqrt(mean(colMeans(
-            matrix(sq_res[2:(cur_sp_level + 1), offset:(offset + glevels[l] - 2)], nrow =
-                     cur_sp_level)
-          )))
-          me_levels[2, l] = mean(colMeans(matrix(res[2:(cur_sp_level + 1), offset:(offset +
-                                                                                     glevels[l] - 2)], nrow = cur_sp_level)))
-          offset = offset + glevels[l] - 1
-        }
-        
-        rmse_levels
-        me_levels
-        
-        Y_test = X[n_train:n, ] %*% betas
-        Y_est = X[n_train:n, ] %*% beta_est
-        
-        beta0_est = mean(la$beta0)
-        sigma_est = mean(la$sigma)
-        
-        mean_y = mean(Y)
-        sd_y   = sd(Y)
-        mse    = sqrt(mean((Y_test - Y_est) ^ 2))
-        
-        df = data.frame()
-        
-        result = list(
-          "rmse_nz" = rmse_nonzero,
-          "rmse_z" = rmse_zero,
-          "rmse_levels" = rmse_levels,
-          "me_levels" = me_levels,
-          "mse" = mse,
-          "mean_y" = mean_y,
-          "sd_y" = sd_y,
-          "beta0_est" = beta0_est,
-          "beta_est" = beta_est,
-          "sigma_est" = sigma_est,
-          "sp" = cur_sp_level,
-          "SNR" = cur_SNR,
-          "p0" = cur_p0,
-          "tau0" = tau0,
-          "seed" = seed_cnt,
-          "elapsedTime" = elapsedTime,
-          "ii" = ii,
-          "seed_cnt" = seed_cnt
-        )
-        
-        results[[cnt_sp]][[cnt_SNR]][[cnt_p0]][[ii]] = result
-        print(seed_cnt/(length(p0)*length(SNR)*length(sp_level)*num_innerLoops))
-        seed_cnt = seed_cnt + 1
-      }
-      save(results, file = resfile)
-    }
-  }
+  return(list(
+    betas = betas,
+    group_ids = group_ids,
+    num_nonzero = num_nonzero
+  ))
 }
 
+dgp_lp <- function(scenarios,
+                   dgp = 1,
+                   seed_cnt,
+                   isTestData = F) {
+  p <- ifelse(scenarios$sparse[dgp] == "high", 20, 16)
+  n <-  if (!isTestData) {
+    scenarios$n[dgp]
+  } else
+    5e3
+  
+  cur_sp_level = ifelse(scenarios$sparse[dgp] == "high", 2, 1)
+  gCoef = createGroupedCoefs(dgp, cur_sp_level)
+  D = length(gCoef$betas)
+  
+  p0 = c(1, gCoef$num_nonzero, D - 1)
+  num_groups = (cur_sp_level + 1) * num_dg
+  
+  if (scenarios$p[dgp] == "strict") {
+    cur_p0 = 1
+  } else if (scenarios$p[dgp] == "opt") {
+    cur_p0 = gCoef$num_nonzero
+  } else if (scenarios$p[dgp] == "loose") {
+    cur_p0 = D - 1
+  }
+  
+  # data
+  set.seed(seed_cnt)
+  inpMat = matrix(nrow = n, ncol = num_dg * (1 + cur_sp_level))
+  for (i in 1:ncol(inpMat)) {
+    cur_glevel = glevels[((i - 1) %% num_dg) + 1]
+    # todo: change to draw till valid
+    inpMat[, i] = as.character(c(
+      sample(1:cur_glevel, cur_glevel, FALSE),
+      sample(1:cur_glevel, n - cur_glevel, TRUE)
+    ))
+  }
+  
+  df = data.frame(inpMat)
+  mM = model.matrix(~ ., df)
+  
+  x = mM[, 2:ncol(mM)] # intercept gets estimated seperately
+  y = x %*% gCoef$betas
+  
+  tau0 = cur_p0 / (sqrt(n) * (D - cur_p0))
+  
+  # response & test data
+  # adjust snr
+  eps = scale(rnorm(n))
+  eps = sqrt(var(y)[1, 1] / scenarios$snr[dgp]) * eps
+  y = data.frame(y = y + eps)
+  
+  test <- if (!isTestData) {
+    dgp_lp(scenarios,
+           dgp,
+           seed_cnt = seed_cnt + 1,
+           isTestData = TRUE)
+  } else
+    NULL
+  
+  data <- data.frame(cbind(y, x))
+  
+  return(
+    structure(
+      data,
+      test = test,
+      tau0 = tau0,
+      group_ids = gCoef$group_ids,
+      num_groups = num_groups,
+      df_tp = df[, 1:num_dg],
+      # true predictors
+      beta = gCoef$betas,
+      num_nonzero = gCoef$num_nonzero
+    )
+  )
+}
+
+createDatasets <- function(reps, scenarios) {
+  datasets = vector("list", nrow(scenarios))
+  i = 1
+  for (dgp in 1:nrow(scenarios)) {
+    datasets[[dgp]] = vector("list", reps)
+    for (j in 1:reps) {
+      datasets[[dgp]][[j]] <-
+        dgp_lp(scenarios = scenarios, dgp = dgp, i)
+      i = i + 1
+    }
+  }
+  return(datasets)
+}
+
+compute_mse <- function(ds) {
+  sp = stan_params(
+    Y = ds$y,
+    X = ds[, -which(names(ds) %in% c("y"))],
+    group_ids = attr(ds, "group_ids"),
+    num_groups = attr(ds, "num_groups"),
+    scale_global = attr(ds, "tau0")
+  )
+  
+  ptm <- proc.time()
+  fit = sampling(
+    attr(sp, 'sm'),
+    data = sp,
+    iter = 500,
+    control = list(adapt_delta = 0.99),
+    seed = seed_cnt,
+    sample_file = tempdir()
+  )
+  elapsedTime = (proc.time() - ptm)[3]
+  
+  test_data = attr(ds, "test")
+  ev = evalSP_lp(sp = sp,
+                 fit = fit,
+                 X = as.matrix(test_data[, -which(names(ds) %in% c("y"))]))
+  ghs_mse = mean((ev$y_hat - test_data$y) ^ 2)
+  attr(ghs_mse, 'elapsedTime') = elapsedTime
+  attr(ghs_mse, 'beta') = ev$beta
+  attr(ghs_mse, 'beta0') = ev$beta0
+  return(ghs_mse)
+}
+
+compute_param_mse <- function(ds, beta) {
+  num_nonzero = attr(ds, "num_nonzero")
+  cur_sp_level = ifelse(scenarios$sparse[dgp] == "high", 2, 1)
+  sq_res = (beta - attr(ds, "beta")) ^ 2
+  
+  mse_nonzero = mean(sq_res[1:num_nonzero])
+  mse_zero    = mean(sq_res[(num_nonzero + 1):length(sq_res)])
+  
+  mse_levels = matrix(nrow = 2, ncol = num_dg) # 1: nonzero 2: zero
+  
+  sq_res = matrix(sq_res, nrow = cur_sp_level + 1, byrow = TRUE)
+  offset = 1
+  for (l in 1:num_dg) {
+    mse_levels[1, l] = sqrt(mean(sq_res[1, offset:(offset + glevels[l] - 2)]))
+    
+    mse_levels[2, l] =  sqrt(mean(colMeans(matrix(sq_res[2:(cur_sp_level + 1), offset:(offset + glevels[l] - 2)], nrow =
+                                                    cur_sp_level))))
+    offset = offset + glevels[l] - 1
+  }
+  return(list(
+    mse_nonzero = mse_nonzero,
+    mse_zero = mse_zero,
+    mse_levels = mse_levels
+  ))
+}
+
+compute_oracle_mse <- function(ds) {
+  test_data = attr(ds, "test")
+  m = lm(ds$y ~ ., attr(ds, "df_tp"))
+  oracle_y = predict(m, attr(test_data, "df_tp"))
+  oracle_mse = mean((test_data$y - oracle_y) ^ 2)
+}
+
+if (TRUE) {
+  source("ghs-am.R")
+  source("util-lp.R")
+  
+  rstan_options(auto_write = TRUE)
+  options(mc.cores = parallel::detectCores())
+  
+  reps = 1
+  seed_cnt = 1
+  set.seed(seed_cnt)
+  
+  scenarios = get_lp_scenarios()
+  resfile = get_lp_file()
+  datasets = createDatasets(reps, scenarios)
+  
+  nsz =  nrow(scenarios)
+  total = nsz * reps
+  
+  results = vector("list", 0)
+  
+  for (cnt in 1:total) {
+    j = cnt %/% nsz + 1       # number of repetition
+    dgp   = cnt %% nsz + 1
+    
+    ds = datasets[[dgp]][[j]]
+    
+    ghs_mse = compute_mse(ds)
+    pmses = compute_param_mse(ds, attr(ghs_mse, 'beta'))
+    oracle_mse = compute_oracle_mse(ds)
+    
+    result = list(
+      mse_levels = pmses$mse_levels,
+      mse_zero = pmses$mse_zero,
+      mse_nonzero = pmses$mse_nonzero,
+      j = j,
+      dgp = dgp,
+      ghs_mse = ghs_mse,
+      oracle_mse = oracle_mse,
+      beta = attr(ghs_mse, 'beta'),
+      beta0 = attr(ghs_mse, 'beta0'),
+      elapsedTime = attr(ghs_mse, 'elapsedTime')
+    )
+    print(paste("Progress: ", as.character(cnt / total)))
+    results[[as.character(cnt)]] = result
+    save(results, file = resfile)
+  }
+}
